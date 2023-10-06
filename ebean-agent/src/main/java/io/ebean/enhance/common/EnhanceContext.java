@@ -5,7 +5,10 @@ import io.ebean.enhance.entity.MessageOutput;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +50,8 @@ public class EnhanceContext {
 
   private SummaryInfo summaryInfo;
 
+  private List<String> packages;
+
   public EnhanceContext(ClassBytesReader classBytesReader, String agentArgs, AgentManifest manifest) {
     this(classBytesReader, agentArgs, manifest, new ClassMetaCache());
   }
@@ -81,6 +86,12 @@ public class EnhanceContext {
       } catch (NumberFormatException e) {
         logger.log(Level.WARNING, "Agent debug argument [" + debugValue + "] is not an int?");
       }
+    }
+
+    String packages = agentArgsMap.get("packages");
+    if (packages != null) {
+      this.packages = Arrays.asList(packages.split(","));
+      log(null, "packages = " + this.packages);
     }
 
     if (getPropertyBoolean("printversion", false)) {
@@ -192,6 +203,15 @@ public class EnhanceContext {
    * known libraries JDBC drivers etc can be skipped.
    */
   public boolean isIgnoreClass(String className) {
+    String classPackageName = className.substring(0, className.lastIndexOf("/") ).replace("/", ".");
+    if (this.packages != null) {
+      for (String packageName : this.packages) {
+        if (classPackageName.startsWith(packageName)) {
+          return false;
+        }
+      }
+      return true;
+    }
     return ignoreClassHelper.isIgnoreClass(className);
   }
 
