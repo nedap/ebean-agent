@@ -203,14 +203,16 @@ public class EnhanceContext {
    * known libraries JDBC drivers etc can be skipped.
    */
   public boolean isIgnoreClass(String className) {
-    String classPackageName = className.substring(0, className.lastIndexOf("/") ).replace("/", ".");
-    if (this.packages != null) {
-      for (String packageName : this.packages) {
-        if (classPackageName.startsWith(packageName)) {
-          return false;
+    if (className != null) {
+      String classPackageName = className.substring(0, className.lastIndexOf("/")).replace("/", ".");
+      if (this.packages != null) {
+        for (String packageName : this.packages) {
+          if (classPackageName.startsWith(packageName)) {
+            return false;
+          }
         }
+        return true;
       }
-      return true;
     }
     return ignoreClassHelper.isIgnoreClass(className);
   }
